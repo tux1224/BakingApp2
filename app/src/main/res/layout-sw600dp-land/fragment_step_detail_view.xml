@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+<RelativeLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:id="@+id/player_view"
+        android:focusable="true"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        />
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:layout_below="@id/player_view">
+    <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         android:layout_below="@id/player_view"
+        android:textSize="40sp"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"/>
+
+</ScrollView>
+
+        <ImageView
+            android:id="@+id/right"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="right"
+            android:layout_marginRight="0dp"
+            android:src="@drawable/right" />
+
+        <ImageView
+            android:id="@+id/left"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/left" />
+
+</RelativeLayout>
+
+</FrameLayout>

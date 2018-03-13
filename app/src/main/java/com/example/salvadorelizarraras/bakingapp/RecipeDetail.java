@@ -80,8 +80,7 @@ public class RecipeDetail extends Fragment implements AdapterIngredients.Listene
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.step_view_container, fragment, fragment.getTag()).commit();
             }else {
 
-                getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, fragment.getTag())
-                        .addToBackStack(fragment.getTag()).commit();
+                getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, fragment.getTag()).addToBackStack(fragment.getTag()).commit();
 
             }
 
