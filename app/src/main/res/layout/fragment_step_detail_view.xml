@@ -13,18 +13,18 @@
         android:id="@+id/player_view"
         android:focusable="true"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
+        android:layout_height="@dimen/heightExoplayer"
         />
 <ScrollView
     android:layout_width="match_parent"
-    android:layout_height="250dp"
+    android:layout_height="@dimen/scrollHeight"
     android:layout_below="@id/player_view">
     <TextView
         android:id="@+id/tv_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         android:layout_below="@id/player_view"
-        android:textSize="40sp"
+        android:layout_below="@id/player_view"
+        android:textSize="@dimen/textDescription"
         android:textAlignment="center"
         android:textColor="@android:color/darker_gray"/>
 
@@ -32,8 +32,8 @@
 
         <ImageView
             android:id="@+id/right"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="@dimen/narrowSize"
+            android:layout_height="@dimen/narrowSize"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_gravity="right"
@@ -42,8 +42,8 @@
 
         <ImageView
             android:id="@+id/left"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="@dimen/narrowSize"
+            android:layout_height="@dimen/narrowSize"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             android:src="@drawable/left" />

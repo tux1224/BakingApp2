@@ -97,16 +97,10 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
         uriView = Uri.parse(mStep.getVideoURL());
         tvDescription.setText(mStep.getDescription());
 
-
         if (savedInstanceState!= null) {
             mPreviousPosition = (savedInstanceState.getLong(SESION, 0));
             Log.d(TAG, " mPreviousPosition "+ mPreviousPosition);
-
         }
-
-;
-
-
         return view;
     }
 
@@ -149,14 +143,6 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     }
 
 
-/*    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if(savedInstanceState != null)
-        mPreviousPosition = savedInstanceState.getLong(SESION,0);
-
-    }*/
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -167,13 +153,11 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     @Override
     public void onStart() {
         super.onStart();
-
             initializePlayer(uriView);
-
-        if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
+        if(!Utils.isTablet(getContext()) && getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
             updateData();
 
-
+        Log.d(TAG, "onStart: ");
     }
 
     @Override
@@ -183,16 +167,31 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     @Override
     public void onPause() {
         super.onPause();
-
-
-    }
+        Log.d(TAG, "onPause: ");}
     @Override
     public void onStop() {
         super.onStop();
         releasePlayer();
+        Log.d(TAG, "onStop: ");
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView: ");
+    }
 
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG, "onDetach: ");
+    }
 
     private void updateData(){
 
@@ -297,5 +296,10 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
         }
     }
 
-    //#endregion
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "onConfigurationChanged: ");
+    }
+//#endregion
 }

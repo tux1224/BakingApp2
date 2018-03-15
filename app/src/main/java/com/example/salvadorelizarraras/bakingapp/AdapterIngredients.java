@@ -8,102 +8,92 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.salvadorelizarraras.bakingapp.Recipe.Steps;
+import com.example.salvadorelizarraras.bakingapp.Recipe.Ingredient;
 
 import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static android.content.ContentValues.TAG;
 
 /**
- * Created by Salvador Elizarraras on 09/03/2018.
+ * Created by Salvador Elizarraras on 14/03/2018.
  */
 
-public class AdapterIngredients extends RecyclerView.Adapter<AdapterIngredients.MyViewHolder> {
+public class AdapterIngredients extends RecyclerView.Adapter<AdapterIngredients.MyViewHolder> implements View.OnClickListener  {
 
-    private final int INGREDIENTS = 101;
-    private final int STEPS = 102;
+    private  ArrayList<Ingredient> mData;
+    private Listener listener;
+    private Context context;
 
-    private Listeners listener;
-    private ArrayList<Steps> mData;
-    public void setListener(Listeners listener){
+    public void setData(ArrayList<Ingredient> mData){
+        if(mData == null) {
+            return;
+        }
+
+        this.mData = mData;
+        this.notifyDataSetChanged();
+    }
+    public void setListener(Listener listener){
         this.listener = listener;
     }
 
-    public void setData(ArrayList<Steps> mData){
-        this.mData = mData;
-        notifyDataSetChanged();
-    }
-
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+    public AdapterIngredients.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = (INGREDIENTS == viewType) ?
-                inflater.inflate(R.layout.ingredient_item, parent,false) :
-                inflater.inflate(R.layout.step_item, parent,false);
-                view.setTag(viewType);
+        View view = inflater.inflate(R.layout.item_ingredient,parent, false);
 
         return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
-
-        holder.itemView.setTag(position);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onClick(view);
-            }
-        });
-
-        Log.d(TAG, "onBindViewHolder() returned: " + holder.getItemViewType());
-
-        switch (holder.getItemViewType()){
-
-            case INGREDIENTS:
-                holder.textView.setText("Recipe Ingredients");
-
-                break;
-            case STEPS:
-                holder.textView.setText(mData.get(position-1).getShortDescription());
-                break;
-        }
-
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
-    public int getItemViewType(int position) {
-        if(position == 0) {
-            return INGREDIENTS;
-        }else {
-            return STEPS;
-        }
+    public void onBindViewHolder(MyViewHolder holder, int position) {
+        holder.tvQuantity.setText(String.valueOf(mData.get(position).getQuantity()));
+        holder.tvMeasure.setText(mData.get(position).getMeasure());
+        holder.tvIngredient.setText(mData.get(position).getIngredient());
+
     }
+
 
     @Override
     public int getItemCount() {
-
-        return (mData == null) ? 0 : mData.size() + 1;
+        return (mData == null) ? 0 : mData.size();
     }
 
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView;
+    public Ingredient getItem(int position){
+        return mData.get(position);
+    }
+    @Override
+    public void onClick(View view) {
+        listener.onClick(view);
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder{
+
+        @BindView(R.id.tvQuantity)
+        public TextView tvQuantity;
+        @BindView(R.id.tvMeasure)
+        public TextView tvMeasure;
+        @BindView(R.id.tvIngredient)
+        public TextView tvIngredient;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            int id = (int) itemView.getTag();
-            Log.d(TAG, "MyViewHolderSteps: " + id);
+            ButterKnife.bind(this,itemView);
 
-            textView = (TextView) itemView.findViewById((id == INGREDIENTS) ? R.id.mTvIngredinet : R.id.mTvSteps);
 
         }
     }
-
-    public interface Listeners{
-
+    interface Listener{
         void onClick(View view);
     }
-
 }

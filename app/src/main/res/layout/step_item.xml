@@ -4,20 +4,20 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
-    android:layout_margin="10dp"
-    card_view:cardCornerRadius="4dp"
-    android:elevation="10dp">
+    android:layout_height="@dimen/heightCardVierwStepsItem"
+    android:layout_margin="@dimen/marginCardView"
+    card_view:cardCornerRadius="@dimen/cornerRadious"
+    card_view:elevation="@dimen/cardViewElevation">
 <RelativeLayout
     android:id="@+id/mRelative"
-  android:layout_width="match_parent"
-    android:layout_height="70dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/mTvSteps"
         android:layout_gravity="center_vertical"
         android:layout_centerVertical="true"
-        android:textSize="20sp"
+        android:textSize="@dimen/textItem"
         android:layout_width="match_parent"
         android:text="@string/app_name"
         android:textAlignment="center"

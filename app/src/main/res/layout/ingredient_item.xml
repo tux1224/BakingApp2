@@ -4,17 +4,17 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
-    android:layout_margin="10dp"
-    card_view:cardCornerRadius="4dp"
-    android:elevation="10dp">
+    android:layout_height="@dimen/heightCardVierwStepsItem"
+    android:layout_margin="@dimen/marginCardView"
+    card_view:cardCornerRadius="@dimen/cornerRadious"
+    android:elevation="@dimen/cardViewElevation">
 
     <RelativeLayout
         android:id="@+id/mRelative"
     android:orientation="vertical"
         android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp">
+    android:padding="@dimen/padding">
 
 
         <TextView
@@ -25,7 +25,7 @@
             android:layout_centerVertical="true"
             android:text="@string/app_name"
             android:textAlignment="center"
-            android:textSize="20sp" />
+            android:textSize="@dimen/textItem" />
 </RelativeLayout>
 
     </android.support.v7.widget.CardView>

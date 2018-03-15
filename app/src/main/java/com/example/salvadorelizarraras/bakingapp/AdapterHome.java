@@ -72,10 +72,7 @@ public class AdapterHome extends RecyclerView.Adapter<AdapterHome.MyViewHolder> 
         });
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return super.getItemViewType(position);
-    }
+
 
 
     @Override
@@ -94,7 +91,6 @@ public class AdapterHome extends RecyclerView.Adapter<AdapterHome.MyViewHolder> 
         TextView mTitle;
         @BindView(R.id.mImageView)
         ImageView mImage;
-        MainActivity mainActivity;
 
         public MyViewHolder(View itemView , AdapterHome context) {
             super(itemView);

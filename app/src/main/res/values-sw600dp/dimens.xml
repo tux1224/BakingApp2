@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="width_recycler_view">400dp</dimen>
+    <dimen name="heightExoplayer">400dp</dimen>
+    <dimen name="scrollHeight">250dp</dimen>
+    <dimen name="textDescription">40sp</dimen>
+    <dimen name="narrowSize">100dp</dimen>
+    <dimen name="heighTitle">40dp</dimen>
+    <dimen name="textTitleSize">30sp</dimen>
+    <dimen name="padding">10dp</dimen>
+    <dimen name="widthFrameLayout">390dp</dimen>
+</resources>

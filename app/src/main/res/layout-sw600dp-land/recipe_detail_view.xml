@@ -5,8 +5,9 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/mRecycler_ingredients"
-        android:layout_width="300dp"
+        android:layout_width="@dimen/width_recycler_view"
         android:layout_height="match_parent" />
+
     <FrameLayout
         android:id="@+id/step_view_container"
         android:layout_width="match_parent"
