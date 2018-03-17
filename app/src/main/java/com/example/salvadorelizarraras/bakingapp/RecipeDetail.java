@@ -1,6 +1,8 @@
 package com.example.salvadorelizarraras.bakingapp;
 
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.icu.util.UniversalTimeScale;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import com.example.salvadorelizarraras.bakingapp.Recipe.Recipe;
@@ -23,18 +24,24 @@ import butterknife.ButterKnife;
 
 public class RecipeDetail extends Fragment implements AdapterSteps.Listeners {
 
-    private Fragment fragment;
-    private final String TAG = RecipeDetail.class.getSimpleName();
+    private static Fragment fragmentVideo;
+    public static final String TAG = RecipeDetail.class.getSimpleName();
     private Recipe mRecipe;
-
+    public static String fragmentName = "";
     @BindView(R.id.mRecycler_ingredients)
     RecyclerView mRecicler;
     private AdapterSteps mAdapter;
-    private static String fragmentName;
+    private int mOrientation;
+    private static String configurationChanged;
+    private MainActivity mainActivity;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: ");
+        mainActivity = (MainActivity) getActivity();
+
 
     }
 
@@ -42,11 +49,11 @@ public class RecipeDetail extends Fragment implements AdapterSteps.Listeners {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
         View view = inflater.inflate(R.layout.recipe_detail_view,container, false);
         ButterKnife.bind(this, view);
         Bundle bundle = getArguments();
         mRecipe = bundle.getParcelable("recipe");
-
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         mRecicler.setLayoutManager(layoutManager);
@@ -55,122 +62,150 @@ public class RecipeDetail extends Fragment implements AdapterSteps.Listeners {
         mAdapter.setData(mRecipe.getSteps());
         mRecicler.setAdapter(mAdapter);
 
-
         return view;
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if (savedInstanceState !=null && savedInstanceState.containsKey("fragment")){
-            getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentByTag(fragmentName)).commitAllowingStateLoss();
+    public void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState: ");
+        outState.putInt("orientation",mOrientation);
+        outState.putString("fragment",fragmentName);
+        outState.putString("changed",configurationChanged);
+        super.onSaveInstanceState(outState);
+    }
 
+
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d(TAG, fragmentName +" Restore "+ mOrientation);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey("orientation")){
+            Log.d(TAG, "onViewStateRestored: ");
+            mOrientation = savedInstanceState.getInt("orientation");
+            fragmentName = savedInstanceState.getString("fragment","");
+            configurationChanged = savedInstanceState.getString("changed","");
+            
+
+
+                switch (getResources().getConfiguration().orientation) {
+
+                    case Configuration.ORIENTATION_PORTRAIT:
+                        Log.d(TAG, "onViewStateRestored: IS PORTRAIIT");
+                        if (mOrientation == Configuration.ORIENTATION_LANDSCAPE && !fragmentName.isEmpty() && Utils.isTablet(getContext())) {
+                            Log.d(TAG, "onViewStateRestored: was LANDSCAPE");
+                            getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentByTag(fragmentName)).commit();
+                        }
+
+                        if (mOrientation == Configuration.ORIENTATION_PORTRAIT && !fragmentName.isEmpty() && Utils.isTablet(getContext())) {
+                            Log.d(TAG, "onViewStateRestored: was PORTRAIIT");
+                            getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentByTag(fragmentName)).commit();
+                        }
+                        break;
+
+                }
+            }
+
+    }
+
+    @Override
+    public void onClick(View view) {
+
+        int id = ((int) view.getTag() - 1);
+        Log.d(TAG, "onClick: "+id);
+
+        Bundle bundle = new Bundle();
+        configurationChanged = "";
+
+
+        if (id == -1) {
+            Fragment fragment;
+            fragment = new FragmentIngredients();
+            bundle.putParcelableArrayList("ingredients", mRecipe.getIngredients());
+            fragment.setArguments(bundle);
+            if(Utils.isTablet(getContext())) {
+                if (fragmentName.equals(FragmentsStepDetailView.TAG)) {
+                    getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.step_view_container)).commit();
+                }
+                fragmentName = FragmentIngredients.TAG;
+                getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, FragmentIngredients.TAG).addToBackStack(FragmentIngredients.TAG).commit();
+
+            }else{
+                getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, FragmentIngredients.TAG).addToBackStack(FragmentIngredients.TAG).commit();
+            }
+
+        } else {
+
+            fragmentName = FragmentsStepDetailView.TAG;
+            fragmentVideo = new FragmentsStepDetailView();
+            bundle = new Bundle();
+            bundle.putParcelableArrayList("steps", mRecipe.getSteps());
+            bundle.putInt("position", id);
+            fragmentVideo.setArguments(bundle);
+
+            if (Utils.isTablet(getContext())) {
+                Log.d(TAG, "Landscape and tablet");
+                configurationChanged = "changed";
+                fragmentName = FragmentsStepDetailView.TAG;
+
+                if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+
+                    getFragmentManager().beginTransaction().replace(R.id.main_container, fragmentVideo, FragmentsStepDetailView.TAG).addToBackStack(FragmentsStepDetailView.TAG).commit();
+
+                }else {
+                    getFragmentManager().beginTransaction().replace(R.id.step_view_container, fragmentVideo, FragmentsStepDetailView.TAG).commit();
+                }
+            } else {
+                Log.d(TAG, "Landscape and phone");
+                getFragmentManager().beginTransaction().replace(R.id.main_container, fragmentVideo, FragmentsStepDetailView.TAG).addToBackStack(FragmentsStepDetailView.TAG).commit();
+                fragmentName = "";
+            }
+
+            mOrientation = getResources().getConfiguration().orientation;
         }
+    }
 
-
+    //#regionlifecycle
+    @Override
+    public void onStart() {
+        Log.d(TAG, "onStart: ");
+        super.onStart();
     }
 
     @Override
     public void onResume() {
-        super.onResume();
         Log.d(TAG, "onResume: ");
+        super.onResume();
+
     }
 
     @Override
     public void onPause() {
-        super.onPause();
         Log.d(TAG, "onPause: ");
+        super.onPause();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: ");
-    }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.d(TAG, "onDestroyView: ");
+
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         Log.d(TAG, "onDestroy: ");
-
+        super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        super.onDetach();
         Log.d(TAG, "onDetach: ");
-
+        super.onDetach();
     }
+    //#endregion
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putString("fragment", fragment.getTag());
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if(savedInstanceState!= null && savedInstanceState.containsKey("fragment")){
-            fragmentName = savedInstanceState.getString("fragment");
-            Log.d(TAG, "onViewStateRestored: ");
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-
-        int id = ((int) view.getTag() -1);
-        Log.d(TAG, "onClick: "+ id);
-
-        Bundle bundle = new Bundle();
-        if(id == -1){
-        fragment = new FragmentIngredients();
-        bundle.putParcelableArrayList("ingredients",mRecipe.getIngredients());
-        fragment.setArguments(bundle);
-        getFragmentManager().beginTransaction().replace(R.id.main_container,fragment,fragment.getTag()).addToBackStack(fragment.getTag()).commit();
-
-        }else{
-            fragment = new FragmentsStepDetailView();
-            bundle = new Bundle();
-            bundle.putParcelableArrayList("steps", mRecipe.getSteps());
-            bundle.putInt("position", id);
-            fragment.setArguments(bundle);
-            if(fragmentName != null){
-            getFragmentManager().popBackStack();
-            getFragmentManager().beginTransaction().replace(R.id.step_view_container,fragment,fragment.getTag()).addToBackStack(fragment.getTag()).commit();
-            }
-            if(Utils.isTablet(getContext()) && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-
-                if(fragmentName != null)
-                getActivity().getSupportFragmentManager().popBackStack();
-
-
-                getFragmentManager().beginTransaction().replace(R.id.step_view_container, fragment, fragment.getTag()).addToBackStack(fragment.getTag()).commit();
-
-            }else if(!Utils.isTablet(getContext()) && getResources().getConfiguration().orientation  == Configuration.ORIENTATION_PORTRAIT) {
-
-                getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, fragment.getTag()).addToBackStack(fragment.getTag()).commit();
-
-            }else if(!Utils.isTablet(getContext()) && getResources().getConfiguration().orientation  == Configuration.ORIENTATION_LANDSCAPE) {
-
-                getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, fragment.getTag()).addToBackStack(fragment.getTag()).commit();
-
-            }
-
-        }
-
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Log.d(TAG, "onConfigurationChanged: ");
-    }
 }
+

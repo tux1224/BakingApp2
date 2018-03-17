@@ -1,6 +1,10 @@
 package com.example.salvadorelizarraras.bakingapp;
 
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,7 +33,7 @@ import butterknife.ButterKnife;
  */
 
 public class FragmentHome extends Fragment implements LoaderManager.LoaderCallbacks<String>, AdapterHome.Listeners{
-    private String TAG = FragmentHome.class.getSimpleName();
+    public static final String TAG = FragmentHome.class.getSimpleName();
     private int mPosition = 0;
 
     @BindView(R.id.m_recycler_home)
@@ -60,9 +64,10 @@ public class FragmentHome extends Fragment implements LoaderManager.LoaderCallba
         // region recycler definition
 
 
-        RecyclerView.LayoutManager linearLayout = !Utils.isTablet(getContext()) ?
+        RecyclerView.LayoutManager linearLayout = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
                 new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false):
-                new GridLayoutManager(getContext(),3,LinearLayoutManager.VERTICAL,false);
+                new GridLayoutManager(getContext(),2,LinearLayoutManager.VERTICAL,false);
+
         mRecycler.setLayoutManager(linearLayout);
         adapterHome = new AdapterHome();
         adapterHome.setListener(this);
@@ -83,6 +88,7 @@ public class FragmentHome extends Fragment implements LoaderManager.LoaderCallba
 
             loaderManager.restartLoader(LOADER_CODE, bundle, this);
         }
+
         return view;
     }
 
@@ -147,34 +153,63 @@ public class FragmentHome extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "onSaveInstanceState: ");
-        //utState.putParcelable("KeyForLayoutManagerState", mRecycler.getLayoutManager().onSaveInstanceState());
+        outState.putParcelable("KeyForLayoutManagerState", mRecycler.getLayoutManager().onSaveInstanceState());
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
         Log.d(TAG, "onRestoreInstanceState() returned: " + savedInstanceState);
+
+        if(RecipeDetail.fragmentName.equals(FragmentsStepDetailView.TAG)){
+            Log.d(TAG, "onViewStateRestored: ");
+            getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.step_view_container)).commit();
+            RecipeDetail.fragmentName = "";
+        }
+        super.onViewStateRestored(savedInstanceState);
 
         if(savedInstanceState != null)
         {
             savedRecyclerLayoutState = savedInstanceState.getParcelable("KeyForLayoutManagerState");
+
         }
     }
 
     @Override
     public void onClick(View view) {
-        Log.d(TAG, "onClick() returned: " );
+        Log.d(TAG, "onClick()" );
 
         int id = Integer.parseInt( String.valueOf(view.getTag()));
+
+        openWithFragment(id);
+
+    }
+    private void openWithFragment(final int id){
         Recipe recipe = adapterHome.getItem(id);
         Fragment fragment = new RecipeDetail();
-
         Bundle bundle = new Bundle();
         bundle.putParcelable("recipe", recipe );
         fragment.setArguments(bundle);
 
-        getFragmentManager().beginTransaction().replace(R.id.main_container,fragment,fragment.getTag()).addToBackStack(fragment.getTag()).commit();
 
+        if(Utils.isTablet(getContext())) {
+
+            getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, RecipeDetail.TAG).addToBackStack(RecipeDetail.TAG).commit();
+
+        }else if(!Utils.isTablet(getContext())){
+
+            getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, RecipeDetail.TAG).addToBackStack(RecipeDetail.TAG).commit();
+
+        }
+
+    }
+    private void openWithActivity(int id){
+
+        Recipe recipe = adapterHome.getItem(id);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("recipe", recipe );
+        Intent intent = new Intent(getActivity(), SecondActivity.class);
+        intent.putExtra("bundle",bundle);
+        startActivity(intent);
     }
 }

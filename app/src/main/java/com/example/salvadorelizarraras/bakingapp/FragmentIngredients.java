@@ -26,7 +26,7 @@ import butterknife.ButterKnife;
 
 public class FragmentIngredients extends Fragment implements AdapterIngredients.Listener{
 
-    public final String TAG = FragmentIngredients.class.getSimpleName();
+    public static  final String TAG = FragmentIngredients.class.getSimpleName();
     @BindView(R.id.ingredients_recycler)
     public RecyclerView mRecycler;
     private ArrayList<Ingredient> mData;

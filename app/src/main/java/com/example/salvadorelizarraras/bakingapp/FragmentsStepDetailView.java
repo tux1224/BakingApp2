@@ -47,16 +47,16 @@ import java.util.ArrayList;
  */
 
 public class FragmentsStepDetailView extends Fragment implements ExoPlayer.EventListener, View.OnClickListener{
+
     private SimpleExoPlayer mExoPlayer;
-
-    private final String TAG = FragmentsStepDetailView.class.getSimpleName();
-
+    public final static String TAG = FragmentsStepDetailView.class.getSimpleName();
     private PlaybackStateCompat.Builder mStateBuilder;
     private long mPreviousPosition;
     private final String SESION = "remaining_video";
-    private boolean isPlayerPlaying;
+
 
     Steps mStep;
+    private Bundle mArguments;
     ArrayList<Steps> mSteps;
     TextView tvDescription;
     private int mPosition;
@@ -75,6 +75,7 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        Log.d(TAG, "onCreateView: ");
 
 
         View view       = inflater.inflate(R.layout.fragment_step_detail_view,container,false);
@@ -86,20 +87,27 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
         right.setOnClickListener(this);
 
         if(getArguments() != null && getArguments().containsKey("steps")) {
-
-            Bundle bundle = getArguments();
-            mPosition = bundle.getInt("position");
-            mSteps = bundle.getParcelableArrayList("steps");
+            Log.d(TAG, "onCreateView: + Arguments" );
+            mArguments = getArguments();
+            mPosition = mArguments.getInt("position");
+            mSteps = mArguments.getParcelableArrayList("steps");
             mStep = mSteps.get(mPosition);
-
+            uriView = Uri.parse(mStep.getVideoURL());
+            tvDescription.setText(mStep.getDescription());
+            Log.d(TAG, "onCreateView: "+uriView);
         }
 
-        uriView = Uri.parse(mStep.getVideoURL());
-        tvDescription.setText(mStep.getDescription());
+
 
         if (savedInstanceState!= null) {
+            Log.d(TAG, "onCreateView: ");
             mPreviousPosition = (savedInstanceState.getLong(SESION, 0));
-            Log.d(TAG, " mPreviousPosition "+ mPreviousPosition);
+            mPosition = savedInstanceState.getInt("position");
+            mSteps = savedInstanceState.getParcelableArrayList("steps");
+            mStep = mSteps.get(mPosition);
+            uriView = Uri.parse(mStep.getVideoURL());
+            tvDescription.setText(mStep.getDescription());
+
         }
         return view;
     }
@@ -139,39 +147,51 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     public void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "onSaveInstanceState: "+ mExoPlayer.getCurrentPosition());
         outState.putLong(SESION, mExoPlayer.getCurrentPosition());
+        outState.putParcelableArrayList("steps",mSteps);
+        outState.putInt("position",mPosition);
         super.onSaveInstanceState(outState);
     }
 
-
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null)
-            mPreviousPosition = savedInstanceState.getLong(SESION,0);
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d(TAG, "onViewStateRestored: ");
+
     }
+    //#region lifeCycle
 
     @Override
     public void onStart() {
         super.onStart();
             initializePlayer(uriView);
-        if(!Utils.isTablet(getContext()) && getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
+
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             updateData();
 
-        Log.d(TAG, "onStart: ");
+        Log.d(TAG, "onStart: " + uriView);
+
     }
+
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume: ");
         }
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: ");}
+
+        Log.d(TAG, "onPause: ");
+
+    }
     @Override
     public void onStop() {
         super.onStop();
+        saveMyPosition();
         releasePlayer();
+
         Log.d(TAG, "onStop: ");
     }
 
@@ -185,16 +205,26 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
+        try {
+            if (!Utils.isTablet(getContext()) && getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT)
+            getFragmentManager().beginTransaction().remove(this).commit();
+
+        }catch (IllegalStateException e){
+
+        }
     }
 
     @Override
     public void onDetach() {
+
         super.onDetach();
         Log.d(TAG, "onDetach: ");
     }
+//#endregion
 
     private void updateData(){
 
+        Log.d(TAG, mPosition+"updateData: "+mSteps.size());
         if (mPosition <= 0){
             left.setVisibility(View.INVISIBLE);
             right.setVisibility(View.VISIBLE);
@@ -204,19 +234,20 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
             left.setVisibility(View.VISIBLE);
         }
     }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.left:
                 if(mPosition > 0) {
                     mPosition = mPosition - 1;
-                    restartFragment( mPosition, getArguments());
+                    restartFragment( mPosition, mArguments);
                 }
                 break;
             case R.id.right:
                 if (mPosition < mSteps.size()-1) {
                     mPosition = mPosition + 1;
-                    restartFragment( mPosition, getArguments());
+                    restartFragment( mPosition, mArguments);
                 }
                 break;
         }
@@ -225,11 +256,14 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
     public void restartFragment(int mPosition, Bundle arg) {
 
         Fragment fragmentItself = new FragmentsStepDetailView();
-        Bundle bundle = arg;
+        Bundle bundle = new Bundle();
         bundle.putInt("position",mPosition);
+        bundle.putParcelableArrayList("steps", mSteps);
         fragmentItself.setArguments(bundle);
-        getActivity().getSupportFragmentManager().popBackStack();
-        getFragmentManager().beginTransaction().replace(R.id.main_container,fragmentItself).addToBackStack(fragmentItself.getTag()).commit();
+        getFragmentManager().popBackStack();
+        getFragmentManager().beginTransaction().replace(R.id.main_container, fragmentItself).addToBackStack(FragmentsStepDetailView.TAG).commit();
+
+
     }
 
     private void releasePlayer() {
@@ -241,9 +275,6 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
               mExoPlayer = null;
 
     }
-
-
-
 
 
     //#region callbacks
@@ -296,10 +327,17 @@ public class FragmentsStepDetailView extends Fragment implements ExoPlayer.Event
         }
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Log.d(TAG, "onConfigurationChanged: ");
-    }
+
 //#endregion
+private void saveMyPosition(){
+        if(mExoPlayer != null){
+            mPreviousPosition = mExoPlayer.getCurrentPosition();
+        }
+}
+@Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    Log.d(TAG, "onConfigurationChanged: ");
+}
+
 }
