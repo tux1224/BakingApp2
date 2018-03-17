@@ -126,7 +126,12 @@ public class RecipeDetail extends Fragment implements AdapterSteps.Listeners {
             fragment.setArguments(bundle);
             if(Utils.isTablet(getContext())) {
                 if (fragmentName.equals(FragmentsStepDetailView.TAG)) {
-                    getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.step_view_container)).commit();
+                    Log.d(TAG, "onClick: DELETING FRAGMENT");
+                    try {
+                        getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.step_view_container)).commit();
+                    }catch (IllegalStateException e){
+
+                    }
                 }
                 fragmentName = FragmentIngredients.TAG;
                 getFragmentManager().beginTransaction().replace(R.id.main_container, fragment, FragmentIngredients.TAG).addToBackStack(FragmentIngredients.TAG).commit();

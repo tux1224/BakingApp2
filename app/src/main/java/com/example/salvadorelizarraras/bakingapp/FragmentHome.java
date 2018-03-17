@@ -153,7 +153,7 @@ public class FragmentHome extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "onSaveInstanceState: ");
-        outState.putParcelable("KeyForLayoutManagerState", mRecycler.getLayoutManager().onSaveInstanceState());
+        //outState.putParcelable("KeyForLayoutManagerState", mRecycler.getLayoutManager().onSaveInstanceState());
         super.onSaveInstanceState(outState);
     }
 
@@ -161,9 +161,13 @@ public class FragmentHome extends Fragment implements LoaderManager.LoaderCallba
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onRestoreInstanceState() returned: " + savedInstanceState);
 
-        if(RecipeDetail.fragmentName.equals(FragmentsStepDetailView.TAG)){
+        if(RecipeDetail.fragmentName.equals(FragmentsStepDetailView.TAG) ){
             Log.d(TAG, "onViewStateRestored: ");
-            getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.step_view_container)).commit();
+            try {
+                getFragmentManager().beginTransaction().remove(getFragmentManager().findFragmentById(R.id.step_view_container)).commit();
+            }catch (IllegalStateException e){
+
+            }
             RecipeDetail.fragmentName = "";
         }
         super.onViewStateRestored(savedInstanceState);
